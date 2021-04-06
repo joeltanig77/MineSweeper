@@ -1,9 +1,11 @@
 from PyQt5.QtWidgets import QApplication
-
+from MinesweeperWindow import *
 
 def main():
    app = QApplication([])
-   # Need to add window now
+   window = MinesweeperWindow()
+   window.show()
+   app.exec_()
 
 
 # Press the green button in the gutter to run the script.
