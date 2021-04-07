@@ -5,6 +5,7 @@ def main():
    app = QApplication([])
    window = MinesweeperWindow()
    window.show()
+   window.setFixedSize(600, 600)
    app.exec_()
 
 

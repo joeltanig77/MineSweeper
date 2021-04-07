@@ -4,20 +4,37 @@ from PyQt5.QtCore import *
 import random
 
 class Bomb:
-    def lose(self):
-        pass
+    def __init__(self):
+        self.revealedFlag = False
+        self.loseFlag = False
+
+    def __repr__(self):
+        return str("?")
 
     def flag(self):
         pass
+
+    def revealed(self):
+        return self.revealedFlag
+
+    def clearSpace(self):
+        self.revealedFlag = True
+        self.loseFlag = True
+
+    def getLoseFlag(self):
+        return self.loseFlag
 
 class Move:
     def __init__(self):
         self.revealedFlag = False
         self.numberOfBombsAroundIt = 0
 
+    def __repr__(self):
+        return str(self.getBombsAroundMe())
+
     def clearSpace(self):
         self.revealedFlag = True
-        pass
+
 
     def incrementNumberOfBombsAroundIt(self):
         self.numberOfBombsAroundIt += 1
@@ -40,9 +57,10 @@ class MinesweeperModel:
         self.gameState = -1
         self.move = Move()
         self.bomb = Bomb()
-        self.grid = [[0] * (self.rows) for i in range(self.cols)]
+        self.grid = []
     def newGame(self):
         # Creates a new board
+        self.grid = [[0] * (self.rows) for i in range(self.cols)]
         count = self.rows*self.cols
         bombCount = 10
         listOfBoardPieces = []
@@ -67,12 +85,6 @@ class MinesweeperModel:
 
         print(self.grid)
         #grid[self.rows-1][self.cols-1] = Bomb()
-        s = [[str(e) for e in row] for row in self.grid]
-        lens = [max(map(len, col)) for col in zip(*s)]
-        fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
-        table = [fmt.format(*row) for row in s]
-        print('\n'.join(table))
-
         # Need to now figure out the bombs next to each move class
         for i in range(len(self.grid)):
             for j in range(len(self.grid[i])):
@@ -309,6 +321,9 @@ class MinesweeperModel:
                             grab = self.grid[i - 1][j + 1]
                             grab.incrementNumberOfBombsAroundIt()
                             print(grab.getBombsAroundMe())
+        print(self.grid)
+        for i in self.grid:
+            print(i)
 
     def getMoveCount(self):
         return self.moveCount
@@ -316,6 +331,26 @@ class MinesweeperModel:
     def getGameState(self):
         return self.gameState
 
+    #TODO: Need to have users pick moves next
     def getSquare(self,i,j):
-        pass
+        self.reveal(i,j)
+        return self.grid[i][j]
 
+    def reveal(self,i,j):
+        grab = self.grid[i][j]
+        if grab.revealed() == False:
+            grab.clearSpace()
+            self.moveCount += 1
+
+        if isinstance(self.grid[i][j],Bomb):
+            self.gameState = 0
+
+    def revealAllBombs(self):
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[i])):
+                if isinstance(self.grid[i][j], Bomb):
+                    grab = self.grid[i][j]
+                    grab.clearSpace()
+
+    def getPuzzle(self):
+        return self.grid
