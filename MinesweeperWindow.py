@@ -19,20 +19,20 @@ class MinesweeperWindow(QMainWindow):
         layout = QVBoxLayout()
         widget.setLayout(layout)
 
-        self.buttons =[]
+        self.buttons = [[0] * (10) for i in range(10)]
 
         #Add grid logic
         self.board = QGridLayout()
-        for i in range(100):
-            button = QPushButton("X")
-            button.clicked.connect(self.buttonClicked)
-            button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            self.buttons.append(button)
-            row = i // 10 # integer division by # of columns to get the row
-            col = i % 10  # remainder when divided by # of cols gives us a column
-            self.board.addWidget(self.buttons[i],row,col)
-        QTimer.singleShot(0, lambda: self.print_coordinates(1, 1))
+        for i in range(len(self.buttons)):
+            for j in range(len(self.buttons[i])):
+                button = QPushButton("X")
+                button.clicked.connect(lambda _, row=i,col=j: self.buttonClicked(row,col))
+                button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                self.buttons[i][j] = (button)
+                self.board.addWidget(self.buttons[i][j],i,j)
+        #QTimer.singleShot(0, lambda: self.print_coordinates(0, 0))
         layout.addLayout(self.board)
+
 
 
         # only two menu items, so may as well set them up here
@@ -53,18 +53,13 @@ class MinesweeperWindow(QMainWindow):
             #Ask for user input here
        #     pass
 
-        print(self.mine.getSquare(0, 0))
-        print("Yes")
-        if self.mine.getGameState() == 0:
-            self.mine.revealAllBombs()
-            exit(0)
 
     def newGame(self):
         print("New game started!")
-
         # Reset the buttons
-        for button in self.buttons:
-            button.setEnabled(True)
+        for i in range(len(self.buttons)):
+            for j in range(len(self.buttons[i])):
+                self.buttons[i][j].setEnabled(True)
 
         # Call the new game from the model
         self.mine.newGame()
@@ -73,21 +68,27 @@ class MinesweeperWindow(QMainWindow):
     def print_coordinates(self, x, y):
         it = self.board.itemAtPosition(x, y)
         w = it.widget()
-        print(w.pos())
+        #print(w.pos())
 
-    def buttonClicked(self):
+    def buttonClicked(self,row,col):
         clicked = self.sender()
         symbol = clicked.text()  # the buttons have the symbols on them
         print("Button was clicked!")
+        #print(clicked.text(), ":", clicked.pos(), clicked.geometry())
 
         clicked.setEnabled(False)
         # Have to tell the model about the move here
-        self.mine.getSquare(0,0)
+        print(row)
+        print(col)
+        self.mine.getSquare(row,col)
 
         # Update the puzzle
         if self.mine.getGameState() == 0:
             # We lose here
             print("You lost the game")
+            if self.mine.getGameState() == 0:
+                self.mine.revealAllBombs()
+                exit(0)
             pass
         elif self.mine.getGameState() == 1:
             # We win here
@@ -98,7 +99,3 @@ class MinesweeperWindow(QMainWindow):
             pass
 
 
-    @pyqtSlot()
-    def on_clicked(self):
-        button = self.sender()
-        print(button.text(), ":", button.pos(), button.geometry())

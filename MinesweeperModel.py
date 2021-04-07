@@ -61,6 +61,8 @@ class MinesweeperModel:
     def newGame(self):
         # Creates a new board
         self.grid = [[0] * (self.rows) for i in range(self.cols)]
+        self.moveCount = 0
+        self.gameState = -1
         count = self.rows*self.cols
         bombCount = 10
         listOfBoardPieces = []
