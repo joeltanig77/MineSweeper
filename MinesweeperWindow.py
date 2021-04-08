@@ -21,11 +21,13 @@ class MinesweeperWindow(QMainWindow):
 
         self.buttons = [[0] * (10) for i in range(10)]
 
+        self.mine.newGame()
+
         #Add grid logic
         self.board = QGridLayout()
         for i in range(len(self.buttons)):
             for j in range(len(self.buttons[i])):
-                button = QPushButton("X")
+                button = QPushButton("")
                 button.clicked.connect(lambda _, row=i,col=j: self.buttonClicked(row,col))
                 button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
                 self.buttons[i][j] = (button)
@@ -48,7 +50,7 @@ class MinesweeperWindow(QMainWindow):
 
         # This is the game logic
         # Start the game here
-        self.mine.newGame()
+
       #  while mine.getGameState() == -1:
             #Ask for user input here
        #     pass
@@ -59,7 +61,11 @@ class MinesweeperWindow(QMainWindow):
         # Reset the buttons
         for i in range(len(self.buttons)):
             for j in range(len(self.buttons[i])):
-                self.buttons[i][j].setEnabled(True)
+                button = QPushButton("")
+                button.clicked.connect(lambda _, row=i, col=j: self.buttonClicked(row, col))
+                button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                self.buttons[i][j] = (button)
+                self.board.addWidget(self.buttons[i][j], i, j)
 
         # Call the new game from the model
         self.mine.newGame()
@@ -77,19 +83,26 @@ class MinesweeperWindow(QMainWindow):
         #print(clicked.text(), ":", clicked.pos(), clicked.geometry())
 
         clicked.setEnabled(False)
-        # Have to tell the model about the move here
+        grab = self.buttons[row][col]
+        #grab.setText(str("2"))
         print(row)
         print(col)
-        self.mine.getSquare(row,col)
+
+        self.buttons[row][col] = QLabel("       " + str(self.mine.getSquare(row,col)))  # TODO: Need to fix alignment and not hardcode it
+        #self.buttons[row][col] = QLabel("       ?")
+        self.board.addWidget(self.buttons[row][col], row, col)
+
+        # Have to tell the model about the move here
+
 
         # Update the puzzle
         if self.mine.getGameState() == 0:
             # We lose here
             print("You lost the game")
-            if self.mine.getGameState() == 0:
-                self.mine.revealAllBombs()
-                exit(0)
-            pass
+            self.disableAllButtons()
+            self.mine.revealAllBombs(self.board,self.buttons)
+            #exit(0)
+
         elif self.mine.getGameState() == 1:
             # We win here
             print("You win the game")
@@ -98,4 +111,8 @@ class MinesweeperWindow(QMainWindow):
             # Continue the game
             pass
 
-
+    def disableAllButtons(self):
+        for i in range(len(self.buttons)):
+            for j in range(len(self.buttons[i])):
+                self.buttons[i][j].setEnabled(False)
+        # TODO: Play the game and see what needs to be fixed

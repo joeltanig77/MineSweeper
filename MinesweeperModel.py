@@ -347,12 +347,14 @@ class MinesweeperModel:
         if isinstance(self.grid[i][j],Bomb):
             self.gameState = 0
 
-    def revealAllBombs(self):
+    def revealAllBombs(self,board,buttons):
         for i in range(len(self.grid)):
             for j in range(len(self.grid[i])):
                 if isinstance(self.grid[i][j], Bomb):
                     grab = self.grid[i][j]
                     grab.clearSpace()
+                    buttons[i][j] = QLabel("       " + str("b"))
+                    board.addWidget(buttons[i][j], i, j)
 
     def getPuzzle(self):
         return self.grid
