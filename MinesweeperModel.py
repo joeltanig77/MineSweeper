@@ -9,7 +9,7 @@ class Bomb:
         self.loseFlag = False
 
     def __repr__(self):
-        return str("?")
+        return str("")
 
     def flag(self):
         pass
@@ -23,6 +23,9 @@ class Bomb:
 
     def getLoseFlag(self):
         return self.loseFlag
+
+    def resetReveal(self):
+        self.revealedFlag = False
 
 class Move:
     def __init__(self):
@@ -48,6 +51,9 @@ class Move:
     def revealed(self):
         return self.revealedFlag
 
+    def resetReveal(self):
+        self.revealedFlag = False
+
 class MinesweeperModel:
     def __init__(self):
         self.rows = 10
@@ -55,14 +61,17 @@ class MinesweeperModel:
         self.moveCount = 0
         # -1 = in progress, 0 = lose, 1 = win
         self.gameState = -1
+        self.winCounter = 100 - 10 # TODO: Change the hard coded values later
+        self.pixmap = QPixmap('windows2.jpg')
         self.move = Move()
         self.bomb = Bomb()
         self.grid = []
     def newGame(self):
-        # Creates a new board
+        # Creates a new board and resets vars
         self.grid = [[0] * (self.rows) for i in range(self.cols)]
         self.moveCount = 0
         self.gameState = -1
+        self.winCounter = 100 - 10
         count = self.rows*self.cols
         bombCount = 10
         listOfBoardPieces = []
@@ -86,8 +95,8 @@ class MinesweeperModel:
                 count -= 1
 
         print(self.grid)
-        #grid[self.rows-1][self.cols-1] = Bomb()
-        # Need to now figure out the bombs next to each move class
+
+        self.resetReveal()
         for i in range(len(self.grid)):
             for j in range(len(self.grid[i])):
                 if isinstance(self.grid[i][j],Bomb):
@@ -333,7 +342,10 @@ class MinesweeperModel:
     def getGameState(self):
         return self.gameState
 
-    #TODO: Need to have users pick moves next
+    def getWinCounter(self):
+        return self.winCounter
+
+
     def getSquare(self,i,j):
         self.reveal(i,j)
         return self.grid[i][j]
@@ -346,6 +358,12 @@ class MinesweeperModel:
 
         if isinstance(self.grid[i][j],Bomb):
             self.gameState = 0
+        else:
+            self.winCounter -= 1
+            print(self.winCounter)
+
+        if self.winCounter == 0:
+            self.gameState = 1
 
     def revealAllBombs(self,board,buttons):
         for i in range(len(self.grid)):
@@ -353,8 +371,16 @@ class MinesweeperModel:
                 if isinstance(self.grid[i][j], Bomb):
                     grab = self.grid[i][j]
                     grab.clearSpace()
-                    buttons[i][j] = QLabel("       " + str("b"))
+                    buttons[i][j] = QLabel()
+                    buttons[i][j].setPixmap(self.pixmap)
+                    buttons[i][j].setAlignment(Qt.AlignCenter)
                     board.addWidget(buttons[i][j], i, j)
 
     def getPuzzle(self):
         return self.grid
+
+    def resetReveal(self):
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[i])):
+                grab = self.grid[i][j]
+                grab.resetReveal()
