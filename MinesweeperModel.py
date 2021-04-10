@@ -62,7 +62,7 @@ class MinesweeperModel:
         # -1 = in progress, 0 = lose, 1 = win
         self.gameState = -1
         self.winCounter = 100 - 10 # TODO: Change the hard coded values later
-        self.pixmap = QPixmap('windows2.jpg')
+        self.pixmap = QPixmap('windows2.png')
         self.move = Move()
         self.bomb = Bomb()
         self.grid = []

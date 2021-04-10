@@ -5,13 +5,14 @@ from PyQt5.QtCore import *
 from PyQt5.Qt import Qt
 from MinesweeperModel import *
 
+
 # This is the view controller
 
-class MinesweeperWindow(QMainWindow):
+class MinesweeperWindow(QMainWindow,QWidget):
     def __init__(self):
         super(MinesweeperWindow,self).__init__()
-        #sound = QSound("WindowsXPExclamation.wav")
-        #sound.play("WindowsXPExclamation.wav")
+        sound = QSound("WindowsXPExclamation.wav")
+        sound.play("WindowsXPExclamation.wav")
         self.mine = MinesweeperModel()
         self.winOrLoseLabel = QLabel("")
         # Add a widget at the center
@@ -21,7 +22,7 @@ class MinesweeperWindow(QMainWindow):
         # we'll stack the puzzle above the grid of buttons with this
         self.layout = QVBoxLayout()
         widget.setLayout(self.layout)
-
+        self.timer = QTimer()
         self.buttons = [[0] * (10) for i in range(10)]
 
         self.mine.newGame()
@@ -36,7 +37,7 @@ class MinesweeperWindow(QMainWindow):
                 button.clicked.connect(lambda _, row=i,col=j: self.buttonClicked(row,col))
                 button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
                 self.buttons[i][j] = (button)
-                self.buttons[i][j].setStyleSheet("background-color : gray")
+                self.buttons[i][j].setStyleSheet("background-color : #A9A9A9")
                 self.board.addWidget(self.buttons[i][j],i,j)
         #QTimer.singleShot(0, lambda: self.print_coordinates(0, 0))
         self.layout.addLayout(self.board)
@@ -67,8 +68,8 @@ class MinesweeperWindow(QMainWindow):
     def newGame(self):
         print("New game started!")
         # Play the sounds
-        #sound = QSound("WindowsXPExclamation.wav")
-        #sound.play("WindowsXPExclamation.wav")
+        sound = QSound("WindowsXPExclamation.wav")
+        sound.play("WindowsXPExclamation.wav")
         # Reset the buttons
         for i in range(len(self.buttons)):
             for j in range(len(self.buttons[i])):
@@ -76,7 +77,7 @@ class MinesweeperWindow(QMainWindow):
                 button.clicked.connect(lambda _, row=i, col=j: self.buttonClicked(row, col))
                 button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
                 self.buttons[i][j] = (button)
-                self.buttons[i][j].setStyleSheet("background-color : gray")
+                self.buttons[i][j].setStyleSheet("background-color : #A9A9A9")
                 self.board.addWidget(self.buttons[i][j], i, j)
 
         # Call the new game from the model
@@ -85,6 +86,9 @@ class MinesweeperWindow(QMainWindow):
         self.layout.removeWidget(self.winOrLoseLabel)
         self.winOrLoseLabel = QLabel("")
 
+    def turnOnFlags(self,event):
+        if event.key() == Qt.MouseButton:
+            print("yes")
 
     def print_coordinates(self, x, y):
         it = self.board.itemAtPosition(x, y)
@@ -98,8 +102,8 @@ class MinesweeperWindow(QMainWindow):
         #print(clicked.text(), ":", clicked.pos(), clicked.geometry())
         clicked.setEnabled(False)
 
-        #sound = QSound("WindowsXPPrintcomplete.wav")
-        #sound.play("WindowsXPPrintcomplete.wav")
+        sound = QSound("WindowsXPPrintcomplete.wav")
+        sound.play("WindowsXPPrintcomplete.wav")
         print(row)
         print(col)
 
@@ -120,9 +124,14 @@ class MinesweeperWindow(QMainWindow):
             self.disableAllButtons()
             self.mine.revealAllBombs(self.board,self.buttons)
             self.setFlagWinOrLoseLabel("You lose")
-            self.buttons[row][col].setStyleSheet("background-color : red")
-            #sound = QSound("WindowsXPStartup.wav")
-            #sound.play("WindowsXPStartup.wav")
+
+            sound = QSound("WindowsXPStartup.wav")
+            sound.play("WindowsXPStartup.wav")
+
+            pixmap = QPixmap("windows3.png")
+            self.buttons[row][col].setStyleSheet("background-color : #ff1919")
+            self.buttons[row][col].setPixmap(pixmap)
+            self.buttons[row][col].setAlignment(Qt.AlignCenter)
             #exit(0)
 
         elif self.mine.getGameState() == 1:
@@ -153,4 +162,5 @@ class MinesweeperWindow(QMainWindow):
         self.winOrLoseLabel.setFrameStyle(QFrame.Sunken)
         self.winOrLoseLabel.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.winOrLoseLabel)
-        # TODO: Need to now the "Flag"
+        # TODO: Need to now the "Time"
+
