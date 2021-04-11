@@ -69,7 +69,7 @@ class MinesweeperModel:
     def newGame(self):
         # Creates a new board and resets vars
         self.grid = [[0] * (self.rows) for i in range(self.cols)]
-        self.moveCount = 0
+        self.moveCount = 1
         self.gameState = -1
         self.winCounter = 100 - 10
         count = self.rows*self.cols
@@ -348,13 +348,14 @@ class MinesweeperModel:
 
     def getSquare(self,i,j):
         self.reveal(i,j)
+        self.moveCount += 1
         return self.grid[i][j]
 
     def reveal(self,i,j):
         grab = self.grid[i][j]
         if grab.revealed() == False:
             grab.clearSpace()
-            self.moveCount += 1
+
 
         if isinstance(self.grid[i][j],Bomb):
             self.gameState = 0

@@ -18,11 +18,35 @@ class MinesweeperWindow(QMainWindow,QWidget):
         # Add a widget at the center
         widget = QWidget()
         self.setCentralWidget(widget)
-
+        # A check to make sure we do not delete the flag widget
+        self.firstStart = True
         # we'll stack the puzzle above the grid of buttons with this
         self.layout = QVBoxLayout()
         widget.setLayout(self.layout)
+        self.smallLayout = QHBoxLayout()
+        self.seconds = 0
+
         self.timer = QTimer()
+        self.timer.timeout.connect(self.showTime)
+        self.middleTitle = QLabel()
+        self.timerShow = QLabel()
+        self.moveCount = QLabel()
+
+        self.middleTitle.setText("Sweep the field and avoid the cursed Windows operating system!")
+        self.moveCount.setText("Move Count: 0")
+        self.timerShow.setText("Seconds: " + str(self.seconds))
+        self.seconds += 1
+
+
+
+        self.middleTitle.setAlignment(Qt.AlignCenter)
+        self.moveCount.setAlignment(Qt.AlignLeft)
+        self.timerShow.setAlignment(Qt.AlignRight)
+        self.smallLayout.addWidget(self.moveCount)
+        self.smallLayout.addWidget(self.timerShow)
+        self.layout.addWidget(self.middleTitle)
+        self.layout.addLayout(self.smallLayout)
+
         self.buttons = [[0] * (10) for i in range(10)]
 
         self.mine.newGame()
@@ -61,12 +85,16 @@ class MinesweeperWindow(QMainWindow,QWidget):
         self.winOrLoseLabel.setFrameStyle(QFrame.Sunken)
         self.winOrLoseLabel.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.winOrLoseLabel)
+        self.startTime()
 
         # This is the game logic
         # Start the game here
 
     def newGame(self):
         print("New game started!")
+        self.moveCount.setText("Move Count: 0")
+        self.startTime()
+        self.seconds = 0
         # Play the sounds
         sound = QSound("WindowsXPExclamation.wav")
         sound.play("WindowsXPExclamation.wav")
@@ -83,21 +111,22 @@ class MinesweeperWindow(QMainWindow,QWidget):
         # Call the new game from the model
         self.mine.newGame()
         self.mine.resetReveal()
+        #if not self.firstStart:
+         #   self.layout.removeWidget(self.winOrLoseLabel)
+        #self.firstStart = False
         self.layout.removeWidget(self.winOrLoseLabel)
         self.winOrLoseLabel = QLabel("")
 
-    def turnOnFlags(self,event):
-        if event.key() == Qt.MouseButton:
+    def keyPressEvent(self, event):
+        # TODO: Do toggle mode thing and and keep track of where you clicked, use the lamda thing
+        if event.key() == Qt.Key_E:
             print("yes")
 
-    def print_coordinates(self, x, y):
-        it = self.board.itemAtPosition(x, y)
-        w = it.widget()
-        #print(w.pos())
 
     def buttonClicked(self,row,col):
         clicked = self.sender()
         symbol = clicked.text()  # the buttons have the symbols on them
+        self.updateMoveCount()
         print("Button was clicked!")
         #print(clicked.text(), ":", clicked.pos(), clicked.geometry())
         clicked.setEnabled(False)
@@ -110,17 +139,14 @@ class MinesweeperWindow(QMainWindow,QWidget):
         self.buttons[row][col] = QLabel(str(self.mine.getSquare(row,col)))
         self.buttons[row][col].setAlignment(Qt.AlignCenter)
         self.buttons[row][col].setStyleSheet("background-color : lightblue")
-        #self.buttons[row][col] = QLabel(str(self.mine.getSquare(row,col)))
-        #self.buttons[row][col] = QLabel("       ?")
+
         self.board.addWidget(self.buttons[row][col], row, col)
-
-        # Have to tell the model about the move here
-
 
         # Update the puzzle
         if self.mine.getGameState() == 0:
             # We lose here
             print("You lost the game")
+            self.timer.stop()
             self.disableAllButtons()
             self.mine.revealAllBombs(self.board,self.buttons)
             self.setFlagWinOrLoseLabel("You lose")
@@ -137,6 +163,7 @@ class MinesweeperWindow(QMainWindow,QWidget):
         elif self.mine.getGameState() == 1:
             # We win here
             print("You win the game")
+            self.timer.stop()
             sound = QSound("tada.wav")
             sound.play("tada.wav")
             self.disableAllButtons()
@@ -164,3 +191,13 @@ class MinesweeperWindow(QMainWindow,QWidget):
         self.layout.addWidget(self.winOrLoseLabel)
         # TODO: Need to now the "Time"
 
+    def updateMoveCount(self):
+        self.moveCount.setText("Move Count: " + str(self.mine.getMoveCount()))
+
+    def showTime(self):
+        # Update our seconds every time our system clock ticks
+        self.timerShow.setText("Seconds: " + str(self.seconds))
+        self.seconds += 1
+
+    def startTime(self):
+        self.timer.start(1000)
