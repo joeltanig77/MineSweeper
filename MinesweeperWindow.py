@@ -11,8 +11,6 @@ from MinesweeperModel import *
 class MinesweeperWindow(QMainWindow,QWidget):
     def __init__(self):
         super(MinesweeperWindow,self).__init__()
-        sound = QSound("WindowsXPExclamation.wav")
-        sound.play("WindowsXPExclamation.wav")
         self.mine = MinesweeperModel()
         self.winOrLoseLabel = QLabel("")
         # Add a widget at the center
@@ -25,7 +23,7 @@ class MinesweeperWindow(QMainWindow,QWidget):
         widget.setLayout(self.layout)
         self.smallLayout = QHBoxLayout()
         self.seconds = 0
-
+        self.muteFlag = False
         self.timer = QTimer()
         self.timer.timeout.connect(self.showTime)
         self.middleTitle = QLabel()
@@ -36,6 +34,7 @@ class MinesweeperWindow(QMainWindow,QWidget):
         self.moveCount.setText("Move Count: 0")
         self.timerShow.setText("Seconds: " + str(self.seconds))
         self.seconds += 1
+        self.muteButton = ""
 
 
 
@@ -72,6 +71,8 @@ class MinesweeperWindow(QMainWindow,QWidget):
         menu = self.menuBar().addMenu("&Game")
         newAct = QAction("&New", self, shortcut=QKeySequence.New, triggered=self.newGame)
         menu.addAction(newAct)
+        self.muteButton = QAction("&Mute", self, shortcut=QKeySequence('Ctrl+M'), triggered=self.changeMuteFlag)
+        menu.addAction(self.muteButton)
         menu.addSeparator()
         quitAct = QAction("E&xit", self, shortcut=QKeySequence.Quit, triggered=self.close)
         menu.addAction(quitAct)
@@ -96,8 +97,9 @@ class MinesweeperWindow(QMainWindow,QWidget):
         self.startTime()
         self.seconds = 0
         # Play the sounds
-        sound = QSound("WindowsXPExclamation.wav")
-        sound.play("WindowsXPExclamation.wav")
+        if not self.muteFlag:
+            sound = QSound("WindowsXPExclamation.wav")
+            sound.play("WindowsXPExclamation.wav")
         # Reset the buttons
         for i in range(len(self.buttons)):
             for j in range(len(self.buttons[i])):
@@ -130,9 +132,9 @@ class MinesweeperWindow(QMainWindow,QWidget):
         print("Button was clicked!")
         #print(clicked.text(), ":", clicked.pos(), clicked.geometry())
         clicked.setEnabled(False)
-
-        sound = QSound("WindowsXPPrintcomplete.wav")
-        sound.play("WindowsXPPrintcomplete.wav")
+        if not self.muteFlag:
+            sound = QSound("WindowsXPPrintcomplete.wav")
+            sound.play("WindowsXPPrintcomplete.wav")
         print(row)
         print(col)
 
@@ -150,22 +152,22 @@ class MinesweeperWindow(QMainWindow,QWidget):
             self.disableAllButtons()
             self.mine.revealAllBombs(self.board,self.buttons)
             self.setFlagWinOrLoseLabel("You lose")
-
-            sound = QSound("WindowsXPStartup.wav")
-            sound.play("WindowsXPStartup.wav")
+            if not self.muteFlag:
+                sound = QSound("WindowsXPStartup.wav")
+                sound.play("WindowsXPStartup.wav")
 
             pixmap = QPixmap("windows3.png")
             self.buttons[row][col].setStyleSheet("background-color : #ff1919")
             self.buttons[row][col].setPixmap(pixmap)
             self.buttons[row][col].setAlignment(Qt.AlignCenter)
-            #exit(0)
 
         elif self.mine.getGameState() == 1:
             # We win here
             print("You win the game")
             self.timer.stop()
-            sound = QSound("tada.wav")
-            sound.play("tada.wav")
+            if not self.muteFlag:
+                sound = QSound("tada.wav")
+                sound.play("tada.wav")
             self.disableAllButtons()
             self.setFlagWinOrLoseLabel("You win")
 
@@ -201,3 +203,10 @@ class MinesweeperWindow(QMainWindow,QWidget):
 
     def startTime(self):
         self.timer.start(1000)
+
+    def changeMuteFlag(self):
+        if self.muteFlag == False:
+            self.muteButton.setText("Un&mute")
+        else:
+            self.muteButton.setText("&Mute")
+        self.muteFlag = not self.muteFlag
