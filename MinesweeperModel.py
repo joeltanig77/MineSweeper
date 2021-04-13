@@ -7,12 +7,16 @@ class Bomb:
     def __init__(self):
         self.revealedFlag = False
         self.loseFlag = False
+        self.flag = False
 
     def __repr__(self):
         return str("")
 
-    def flag(self):
-        pass
+    def flagToggle(self):
+        self.flag = not self.flag
+
+    def getFlag(self):
+        return self.flag
 
     def revealed(self):
         return self.revealedFlag
@@ -31,6 +35,7 @@ class Move:
     def __init__(self):
         self.revealedFlag = False
         self.numberOfBombsAroundIt = 0
+        self.flag = False
 
     def __repr__(self):
         return str(self.getBombsAroundMe())
@@ -38,12 +43,15 @@ class Move:
     def clearSpace(self):
         self.revealedFlag = True
 
-
     def incrementNumberOfBombsAroundIt(self):
         self.numberOfBombsAroundIt += 1
 
-    def flag(self):
-        pass
+    def flagToggle(self):
+        self.flag = not self.flag
+
+    def getFlag(self):
+        return self.flag
+
 
     def getBombsAroundMe(self):
         return self.numberOfBombsAroundIt
@@ -349,6 +357,9 @@ class MinesweeperModel:
     def getSquare(self,i,j):
         self.reveal(i,j)
         self.moveCount += 1
+        return self.grid[i][j]
+
+    def getSquareForFlag(self,i,j):
         return self.grid[i][j]
 
     def reveal(self,i,j):
