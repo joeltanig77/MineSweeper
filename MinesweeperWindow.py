@@ -6,13 +6,27 @@ from PyQt5.Qt import Qt
 from MinesweeperModel import *
 
 
+class RightClickableButton(QPushButton):
+    rightClicked = pyqtSignal()
+
+
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            QPushButton.mousePressEvent(self,event)
+
+        elif event.button() == Qt.RightButton:
+
+            self.rightClicked.emit()
+
+
+
 # This is the view controller
 
 class MinesweeperWindow(QMainWindow,QWidget):
     def __init__(self):
         super(MinesweeperWindow,self).__init__()
         self.mine = MinesweeperModel()
-        self.winOrLoseLabel = QLabel("")
         # Add a widget at the center
         widget = QWidget()
         self.setCentralWidget(widget)
@@ -24,6 +38,8 @@ class MinesweeperWindow(QMainWindow,QWidget):
         self.muteFlag = False
         self.timer = QTimer()
         self.timer.timeout.connect(self.showTime)
+        self.winOrLoseLabel = QLabel("")
+        self.revealLabel = QLabel("")
         self.middleTitle = QLabel()
         self.timerShow = QLabel()
         self.moveCount = QLabel()
@@ -57,8 +73,9 @@ class MinesweeperWindow(QMainWindow,QWidget):
         self.board = QGridLayout()
         for i in range(len(self.buttons)):
             for j in range(len(self.buttons[i])):
-                button = QPushButton("")
-                button.clicked.connect(lambda _, row=i,col=j: self.buttonClicked(row,col))
+                button = RightClickableButton("")
+                button.clicked.connect(lambda _, row=i,col=j: self.buttonClicked(row,col)) # TODO: Start here
+               # button.rightClicked.connect(lambda _, row=i,col=j: self.buttonClicked(row,col))
                 button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
                 self.buttons[i][j] = (button)
                 self.buttons[i][j].setStyleSheet("background-color : #A9A9A9")
@@ -81,12 +98,20 @@ class MinesweeperWindow(QMainWindow,QWidget):
         # Set the title here
         self.setWindowTitle("MineSweeper")
 
-        self.winOrLoseLabel = QLabel("Press E to switch to flag mode")
+        self.revealLabel = QLabel("Press E to switch to flag mode")
+        flagFont = QFont("Times", 14, QFont.Bold)
+        self.revealLabel.setFont(flagFont)
+        self.revealLabel.setFrameStyle(QFrame.Sunken)
+        self.revealLabel.setAlignment(Qt.AlignCenter)
+        self.layout.addWidget(self.revealLabel)
+
+
         flagFont = QFont("Times", 14, QFont.Bold)
         self.winOrLoseLabel.setFont(flagFont)
         self.winOrLoseLabel.setFrameStyle(QFrame.Sunken)
         self.winOrLoseLabel.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(self.winOrLoseLabel)
+        #self.layout.addWidget(self.winOrLoseLabel)
+
         self.startTime()
 
         # This is the game logic
@@ -107,8 +132,9 @@ class MinesweeperWindow(QMainWindow,QWidget):
         # Reset the buttons
         for i in range(len(self.buttons)):
             for j in range(len(self.buttons[i])):
-                button = QPushButton("")
+                button = RightClickableButton("")
                 button.clicked.connect(lambda _, row=i, col=j: self.buttonClicked(row, col))
+               # button.rightClicked.connect(lambda _, row=i, col=j: self.buttonClicked(row, col)) # TODO: Start here
                 button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
                 self.buttons[i][j] = (button)
                 self.buttons[i][j].setStyleSheet("background-color : #A9A9A9")
@@ -124,9 +150,9 @@ class MinesweeperWindow(QMainWindow,QWidget):
         # TODO: Do toggle mode thing and and keep track of where you clicked, use the lamda thing
         if event.key() == Qt.Key_E:
             if not self.revealMode:
-                self.winOrLoseLabel.setText("Press E to switch to flag mode")
+                self.revealLabel.setText("Press E to switch to flag mode")
             else:
-                self.winOrLoseLabel.setText("Press E to switch to reveal mode")
+                self.revealLabel.setText("Press E to switch to reveal mode")
                 print("Flag Mode")
             self.revealMode = not self.revealMode
 
