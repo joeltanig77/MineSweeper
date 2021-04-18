@@ -155,11 +155,11 @@ class MinesweeperWindow(QMainWindow, QWidget):
         print("Button was clicked!")
         print(row)
         print(col)
+        if not self.muteFlag:
+            sound = QSound("WindowsNavigationStart.wav")
+            sound.play("WindowsNavigationStart.wav")
         # If we did not click a flag then do these commands
         if self.revealMode:
-            if not self.muteFlag:
-                sound = QSound("WindowsNavigationStart.wav")
-                sound.play("WindowsNavigationStart.wav")
             clicked.setEnabled(False)
             self.buttons[row][col] = QLabel(str(self.mine.getSquare(row, col)))
             self.buttons[row][col].setAlignment(Qt.AlignCenter)
