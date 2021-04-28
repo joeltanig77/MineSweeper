@@ -9,7 +9,7 @@ On your terminal type this command in after you download the files:
 ```
 python3 main.py
 ```
-## Things to note (Extra Credit)
+## Things to note 
 This program also has features like: 
 1. A move count
 2. A timer that starts after each new game starts
